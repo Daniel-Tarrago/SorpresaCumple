@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Raspa y Gana!</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #333333;
+            color: white;
+            text-align: center;
+        }
+
+        #rasca-container {
+            background-color: #f0f0f0; /* Fondo detrás de la tarjeta */
+            border: 5px solid gold;
+            border-radius: 15px;
+            width: 300px;
+            height: 200px;
+            position: relative;
+            overflow: hidden; /* Asegura que el contenido quede dentro */
+        }
+
+        #mensaje-secreto {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: #008000; /* Color del texto secreto */
+            background-color: #fff;
+            padding: 10px;
+            box-sizing: border-box;
+            line-height: 1.3;
+        }
+
+        #capa-rasca {
+            position: absolute;
+            top: 0;
+            left: 0;
+            cursor: pointer;
+            background-color: transparent;
+        }
+
+        h2 {
+            color: white;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>🎉 ¡RASCA AQUÍ PARA LA SORPRESA! 🎉</h2>
+
+    <div id="rasca-container">
+        <div id="mensaje-secreto">
+            <p>¡FELICIDADES!🥳🥳</p>
+        </div>
+        
+        <canvas id="capa-rasca" width="300" height="200"></canvas>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('capa-rasca');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        
+        // 1. DIBUJAR LA CAPA INICIAL
+        function drawScratchLayer() {
+            ctx.fillStyle = '#aaaaaa'; // Color gris para simular el material a rascar
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Añadir un mensaje superpuesto
+            ctx.fillStyle = '#666666';
+            ctx.font = 'bold 24px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('RASCA PARA VER', canvas.width / 2, canvas.height / 2);
+        }
+
+        // 2. FUNCIÓN DE RASCADO
+        function scratch(x, y) {
+            // Usa el modo 'destination-out' para hacer que lo dibujado sea transparente
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            // Dibuja un círculo transparente (simulando la goma de borrar)
+            ctx.arc(x, y, 20, 0, 2 * Math.PI); // 20 es el radio del 'rascador'
+            ctx.fill();
+        }
+
+        // 3. EVENTOS DEL RATÓN Y TÁCTILES (para el móvil)
+        
+        function getCoords(event) {
+            const rect = canvas.getBoundingClientRect();
+            let x, y;
+
+            if (event.touches) {
+                // Para eventos táctiles (móvil/iPhone)
+                x = event.touches[0].clientX - rect.left;
+                y = event.touches[0].clientY - rect.top;
+            } else {
+                // Para eventos del ratón (PC)
+                x = event.clientX - rect.left;
+                y = event.clientY - rect.top;
+            }
+            return { x, y };
+        }
+
+        // Evento de inicio (clic o toque)
+        canvas.addEventListener('mousedown', (e) => {
+            isDrawing = true;
+            const { x, y } = getCoords(e);
+            scratch(x, y);
+        });
+        canvas.addEventListener('touchstart', (e) => {
+            isDrawing = true;
+            const { x, y } = getCoords(e);
+            scratch(x, y);
+            e.preventDefault(); // Previene el scroll en móvil al rascar
+        });
+
+        // Evento de movimiento (arrastre)
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDrawing) return;
+            const { x, y } = getCoords(e);
+            scratch(x, y);
+        });
+        canvas.addEventListener('touchmove', (e) => {
+            if (!isDrawing) return;
+            const { x, y } = getCoords(e);
+            scratch(x, y);
+            e.preventDefault();
+        });
+
+        // Evento de finalización (soltar clic o levantar dedo)
+        canvas.addEventListener('mouseup', () => {
+            isDrawing = false;
+        });
+        canvas.addEventListener('touchend', () => {
+            isDrawing = false;
+        });
+        canvas.addEventListener('mouseleave', () => { // Si el ratón sale del área
+            isDrawing = false;
+        });
+
+
+        // Inicializar el rasca y gana al cargar
+        drawScratchLayer();
+
+    </script>
+
+</body>
+</html>
